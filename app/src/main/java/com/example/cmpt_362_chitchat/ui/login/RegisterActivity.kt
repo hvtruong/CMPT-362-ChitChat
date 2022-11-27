@@ -4,6 +4,7 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.content.Context
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.cmpt_362_chitchat.databinding.ActivityRegisterBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -26,26 +27,29 @@ class RegisterActivity : AppCompatActivity() {
         auth = Firebase.auth
         database = FirebaseDatabase.getInstance().reference
 
-        val username = binding.registerusername
-        val password = binding.registerpassword
+        val email = binding.registerEmail
+        val password = binding.registerPassword
+        val username = binding.registerUsername
         val register = binding.registerBtn
 
         register.setOnClickListener {
-            addAccount(this, username.text.toString(), password.text.toString(), "123")
-           // getAccount(this)
-
+            if (username.text.toString() != "") {
+                addAccount(this, email.text.toString(), password.text.toString(), username.text.toString())
+            } else {
+                Toast.makeText(baseContext, "Username is required.", Toast.LENGTH_SHORT).show()
+            }
         }
 
     }
 
-    fun addAccount(context: Context, email: String, password: String, token: String) {
+    fun addAccount(context: Context, email: String, password: String, username: String) {
 
         //add confirm pw?
 
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this){
             if (it.isSuccessful){
                 println("DEBUG REGISTER SUCCESS: email: $email, password: $password")
-                addAccountToDatabase(auth.currentUser?.uid)
+                addAccountToDatabase(auth.currentUser?.uid, username)
                 finish()
             }else{
                 println("REGISTER FAIL")
@@ -66,9 +70,13 @@ class RegisterActivity : AppCompatActivity() {
         return acc
     }
 
-    private fun addAccountToDatabase(userId: String?) {
+    private fun addAccountToDatabase(userId: String?, username: String) {
         if (userId != null) {
-            database.child("Users").child(userId).push()
+            database
+                .child("Users")
+                .child(userId)
+                .child("Username")
+                .setValue(username)
         } else {
             println("Debug: user not added to db correctly")
         }
