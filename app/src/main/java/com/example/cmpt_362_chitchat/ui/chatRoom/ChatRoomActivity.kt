@@ -15,6 +15,7 @@ class ChatRoomActivity: AppCompatActivity() {
 
     var chatRoom: String = "123456"
     private val sendUID: String = "sample 2"
+    private var chatroomType = "Private"
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var messageBox: EditText
@@ -31,9 +32,14 @@ class ChatRoomActivity: AppCompatActivity() {
 
         supportActionBar?.title = "Sample chat room"
 
-        val chatroomId = intent.getStringExtra("chatroomId")
+        val chatroomId = intent.getStringExtra("chatRoomId")
         if (chatroomId != null) {
             chatRoom = chatroomId
+        }
+
+        val temp = intent.getStringExtra("chatroomType")
+        if (temp != null) {
+            chatroomType = temp
         }
 
         recyclerView = findViewById(R.id.recycler_view)
@@ -47,10 +53,13 @@ class ChatRoomActivity: AppCompatActivity() {
 
         database = FirebaseDatabase.getInstance().reference
 
-        database.child("ChatRooms").child(chatRoom).child("messages")
+        database
+            .child("ChatRooms")
+            .child(chatroomType)
+            .child(chatRoom)
+            .child("messages")
             .addValueEventListener(object: ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-
                     messageList.clear()
 
                     for(snap in snapshot.children) {
@@ -69,7 +78,12 @@ class ChatRoomActivity: AppCompatActivity() {
             println("Clicked")
             val message = Message(messageBox.text.toString(), sendUID)
 
-            database.child("ChatRooms").child(chatRoom).child("messages").push()
+            database
+                .child("ChatRooms")
+                .child(chatroomType)
+                .child(chatRoom)
+                .child("messages")
+                .push()
                 .setValue(message)
             messageBox.onEditorAction(EditorInfo.IME_ACTION_DONE)
             messageBox.setText("")
