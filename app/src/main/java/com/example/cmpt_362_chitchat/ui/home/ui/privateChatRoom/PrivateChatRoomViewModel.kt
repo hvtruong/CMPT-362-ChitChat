@@ -2,7 +2,6 @@ package com.example.cmpt_362_chitchat.ui.home.ui.privateChatRoom
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.cmpt_362_chitchat.data.ChatRoom
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -24,10 +23,7 @@ class PrivateChatRoomViewModel : ViewModel() {
                     val newChatrooms = ArrayList<String>()
 
                     for (snap in snapshot.children) {
-                        val chatRoom = snap.getValue(ChatRoom::class.java)
-                        if (chatRoom != null) {
-                            newChatrooms.add(chatRoom.chatRoomId)
-                        }
+                        newChatrooms.add(snap.key.toString())
                     }
 
                     updateChatrooms(newChatrooms)

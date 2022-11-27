@@ -9,7 +9,6 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.example.cmpt_362_chitchat.databinding.FragmentNewChatRoomBinding
 import com.example.cmpt_362_chitchat.ui.chatRoom.ChatRoomActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -40,8 +39,6 @@ class NewChatRoomFragment : Fragment() {
     ): View {
         auth = Firebase.auth
         database = FirebaseDatabase.getInstance().reference
-        val newChatroomViewModel =
-            ViewModelProvider(this).get(NewChatRoomViewModel::class.java)
 
         _binding = FragmentNewChatRoomBinding.inflate(inflater, container, false)
         val root: View = binding.root
@@ -53,31 +50,27 @@ class NewChatRoomFragment : Fragment() {
 
         val newChatroomButton: Button = binding.buttonNewChatroom
         newChatroomButton.setOnClickListener {
-            val newChatroomId = UUID.randomUUID().toString()
-            val chatroomType = chatroomTypeSpinner.selectedItem.toString()
-            val newChatroom = hashMapOf(
-                "chatRoomId" to newChatroomId,
-                "chatRoomType" to chatroomType
-            )
+            val newChatRoomId = UUID.randomUUID().toString()
+            val chatRoomType = chatroomTypeSpinner.selectedItem.toString()
 
             database
                 .child("ChatRooms")
-                .child(chatroomType)
-                .child(newChatroomId)
+                .child(chatRoomType)
+                .child(newChatRoomId)
                 .child("ownerId")
-                .push()
                 .setValue(auth.currentUser?.uid)
 
-            if (chatroomType == "Private") {
+            if (chatRoomType == "Private") {
                 database.child("Users")
                     .child(auth.currentUser?.uid.toString())
                     .child("ChatRooms")
-                    .push()
-                    .setValue(newChatroom)
+                    .child(newChatRoomId)
+                    .setValue(true)
             }
 
             val intent = Intent(requireActivity(), ChatRoomActivity::class.java)
-            intent.putExtra("chatRoomId", newChatroomId)
+            intent.putExtra("chatRoomId", newChatRoomId)
+            intent.putExtra("chatRoomType", chatRoomType)
             startActivity(intent)
         }
 
