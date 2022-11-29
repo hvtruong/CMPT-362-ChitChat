@@ -6,9 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.Spinner
+import android.widget.*
 import androidx.fragment.app.Fragment
 import com.example.cmpt_362_chitchat.R
 import com.example.cmpt_362_chitchat.databinding.FragmentNewChatRoomBinding
@@ -48,11 +46,6 @@ class NewChatRoomFragment : Fragment() {
         _binding = FragmentNewChatRoomBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val chatroomTypeSpinner: Spinner = binding.spinnerChatroomType
-        val chatroomTypeAdapter: ArrayAdapter<String> =
-            ArrayAdapter(requireContext(), R.xml.spinner_item, chatroomTypes)
-        chatroomTypeSpinner.adapter = chatroomTypeAdapter
-
         val addFriends = binding.addFriendsChatRoom
         addFriends.setOnClickListener {
             val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
@@ -68,6 +61,24 @@ class NewChatRoomFragment : Fragment() {
             val alertDialog: AlertDialog = builder.create()
             alertDialog.show()
         }
+
+        val chatroomTypeSpinner: Spinner = binding.spinnerChatroomType
+        val chatroomTypeAdapter: ArrayAdapter<String> =
+            ArrayAdapter(requireContext(), R.xml.spinner_item, chatroomTypes)
+        chatroomTypeSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // do nothing
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (position == 0) {
+                    addFriends.visibility = View.VISIBLE
+                } else {
+                    addFriends.visibility = View.INVISIBLE
+                }
+            }
+        }
+        chatroomTypeSpinner.adapter = chatroomTypeAdapter
 
         val newChatroomButton: Button = binding.buttonNewChatroom
         newChatroomButton.setOnClickListener {
