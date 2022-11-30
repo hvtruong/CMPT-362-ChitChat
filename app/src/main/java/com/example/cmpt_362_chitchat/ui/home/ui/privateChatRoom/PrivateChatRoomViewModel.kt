@@ -15,7 +15,6 @@ class PrivateChatRoomViewModel : ViewModel() {
     private var database: DatabaseReference
     private val chatRoomListeners: HashMap<String, ValueEventListener> = HashMap()
     val chatrooms = MutableLiveData(ArrayList<String>())
-    val chatRoomsIds = MutableLiveData(ArrayList<String>())
     val chatRoomNames = MutableLiveData(ArrayList<String>())
     val chatRoomPreviews = MutableLiveData(ArrayList<String>())
     val currentPreviews = ArrayList<ArrayList<String>>()
@@ -45,29 +44,6 @@ class PrivateChatRoomViewModel : ViewModel() {
                 }
             })
     }
-
-//    private fun updateChatRoomIds(newChatRoomIDs: ArrayList<String>) {
-//        val newChatRoomNames = ArrayList<String>()
-//        // Get names from ChatRooms database
-//        FirebaseDatabase.getInstance().reference
-//            .child("ChatRooms")
-//            .child("Private")
-//            .get().addOnSuccessListener {
-//                for (chatRoomId in newChatRoomIDs) {
-//                    newChatRoomNames.add(
-//                        it
-//                            .child(chatRoomId)
-//                            .child("ChatRoomName")
-//                            .value.toString()
-//                    )
-//                }
-//
-//                // Update only after retrieving task from database is complete
-//                chatRoomIDs.value = newChatRoomIDs
-//                chatRoomNames.value = newChatRoomNames
-//
-//            }
-//    }
 
     fun updateChatRooms(newChatRoomIds: ArrayList<String>, newChatRoomNames: ArrayList<String>) {
         chatrooms.value = newChatRoomIds
