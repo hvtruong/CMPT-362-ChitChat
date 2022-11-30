@@ -14,7 +14,7 @@ import com.google.firebase.ktx.Firebase
 class PrivateChatRoomViewModel : ViewModel() {
     private var database: DatabaseReference
     private val chatRoomListeners: HashMap<String, ValueEventListener> = HashMap()
-    val chatrooms = MutableLiveData(ArrayList<String>())
+    val chatRoomIds = MutableLiveData(ArrayList<String>())
     val chatRoomNames = MutableLiveData(ArrayList<String>())
     val chatRoomPreviews = MutableLiveData(ArrayList<String>())
     val currentPreviews = ArrayList<ArrayList<String>>()
@@ -29,15 +29,13 @@ class PrivateChatRoomViewModel : ViewModel() {
             .addValueEventListener(object: ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val newChatRoomIds = ArrayList<String>()
-                    val newChatRoomNames = ArrayList<String>()
 
                     for (snap in snapshot.children) {
                         newChatRoomIds.add(snap.key.toString())
-                        newChatRoomNames.add(snap.child("ChatRoomName").value.toString())
                     }
 
                     updateChatRoomListeners(newChatRoomIds)
-                    updateChatRooms(newChatRoomIds, newChatRoomNames)
+                    updateChatRooms(newChatRoomIds)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -45,9 +43,28 @@ class PrivateChatRoomViewModel : ViewModel() {
             })
     }
 
-    fun updateChatRooms(newChatRoomIds: ArrayList<String>, newChatRoomNames: ArrayList<String>) {
-        chatrooms.value = newChatRoomIds
-        chatRoomNames.value = newChatRoomNames
+    fun updateChatRooms(newChatRoomIds: ArrayList<String>) {
+        val newChatRoomNames = ArrayList<String>()
+        // Get names from ChatRooms database
+        FirebaseDatabase.getInstance().reference
+            .child("ChatRooms")
+            .child("Private")
+            .get().addOnSuccessListener {
+                for (chatRoomId in newChatRoomIds) {
+                    newChatRoomNames.add(
+                        it
+                            .child(chatRoomId)
+                            .child("ChatRoomName")
+                            .value.toString()
+                    )
+                }
+
+                // Update only after retrieving task from database is complete
+                chatRoomIds.value = newChatRoomIds
+                chatRoomNames.value = newChatRoomNames
+
+            }
+        
         updateTextPreviews(newChatRoomIds)
     }
 
@@ -64,6 +81,7 @@ class PrivateChatRoomViewModel : ViewModel() {
                         override fun onDataChange(snapshot: DataSnapshot) {
                             val newPreview = ArrayList<String>()
                             newPreview.add(chatRoomId)
+
                             if (snapshot.childrenCount > 0) {
                                 for (snap in snapshot.children) {
                                     val message = snap.getValue(Message::class.java)
@@ -142,6 +160,6 @@ class PrivateChatRoomViewModel : ViewModel() {
     }
 
     fun getChatroom(index: Int) : String {
-        return chatrooms.value?.get(index) ?: ""
+        return chatRoomIds.value?.get(index) ?: ""
     }
 }

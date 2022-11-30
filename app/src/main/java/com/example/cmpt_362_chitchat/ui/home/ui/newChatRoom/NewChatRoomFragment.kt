@@ -23,9 +23,6 @@ import java.util.*
 class NewChatRoomFragment : Fragment() {
     companion object {
         val chatroomTypes = arrayOf("Private", "Public")
-        // TODO: get friends from db
-        val friendIds = arrayOf("")
-        val friendsSelected = BooleanArray(friendIds.size) { false }
     }
 
     private lateinit var database: DatabaseReference
@@ -38,6 +35,12 @@ class NewChatRoomFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    // TODO: get friends from db, remove hard coded friends list
+    val friendIds = arrayOf("uDlrAFaYukYmbhtgKzgDmndIyPu1")
+    val friendUsernames = arrayOf("User1")
+    var friendsSelected = BooleanArray(friendIds.size) { false }
+
+    private lateinit var userId: String
     private lateinit var username: String
 
     override fun onCreateView(
@@ -47,6 +50,7 @@ class NewChatRoomFragment : Fragment() {
     ): View {
         auth = Firebase.auth
         database = FirebaseDatabase.getInstance().reference
+        userId = auth.currentUser?.uid.toString()
         sharedPreferences = requireContext().getSharedPreferences("sharedPreferences", AppCompatActivity.MODE_PRIVATE)
         username = sharedPreferences.getString("username", "").toString()
 
@@ -58,7 +62,7 @@ class NewChatRoomFragment : Fragment() {
             val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
             builder.setTitle("Add Friends")
 
-            builder.setMultiChoiceItems(friendIds, friendsSelected) { _, which, isChecked ->
+            builder.setMultiChoiceItems(friendUsernames, friendsSelected) { _, which, isChecked ->
                 friendsSelected[which] = isChecked
             }
 
@@ -81,6 +85,7 @@ class NewChatRoomFragment : Fragment() {
                 if (position == 0) {
                     addFriends.visibility = View.VISIBLE
                 } else {
+                    friendsSelected = BooleanArray(friendIds.size) { false }
                     addFriends.visibility = View.INVISIBLE
                 }
             }
@@ -94,11 +99,23 @@ class NewChatRoomFragment : Fragment() {
             val newChatRoomId = UUID.randomUUID().toString()
             val chatRoomType = chatroomTypeSpinner.selectedItem.toString()
             var chatRoomName = chatRoomNameEditText.text.toString()
+
+            val participants = ArrayList<String>()
+            participants.add(userId)
+            for ((index, isFriendSelected) in friendsSelected.withIndex()) {
+                if (isFriendSelected) {
+                    participants.add(friendIds[index])
+                }
+            }
+
             if (chatRoomName == "") {
                 chatRoomName = username
-                // TODO: add friend usernames
-                for (friend in friendIds) {
-                    chatRoomName = "$chatRoomName, $friend"
+                for (participant in participants) {
+                    if (participant != userId) {
+                        println("Debug: test ${participants.indexOf(participant)}")
+                        chatRoomName =
+                            "$chatRoomName, ${friendUsernames[participants.indexOf(participant) - 1]}"
+                    }
                 }
             }
 
@@ -117,8 +134,6 @@ class NewChatRoomFragment : Fragment() {
                 .setValue(chatRoomName)
 
             if (chatRoomType == "Private") {
-                val participants = friendIds.toCollection(ArrayList())
-                participants.add(auth.currentUser?.uid.toString())
 
                 for (participant in participants) {
                     database.child("Users")
