@@ -39,7 +39,7 @@ class PublicChatRoomFragment : Fragment() {
         )
 
         publicChatRoomViewModel.chatRoomNames.observe(viewLifecycleOwner) { it ->
-            chatroomsAdapter.replaceChatRooms(it)
+            chatroomsAdapter.replaceChatRoomNames(it)
             chatroomsAdapter.notifyDataSetChanged()
         }
 

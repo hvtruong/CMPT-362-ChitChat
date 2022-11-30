@@ -35,7 +35,7 @@ class ChatRoomListAdapter(
         return view
     }
 
-    fun replaceChatRooms(newChatrooms: ArrayList<String>) {
+    fun replaceChatRoomNames(newChatrooms: ArrayList<String>) {
         chatrooms = newChatrooms
     }
 

@@ -38,8 +38,8 @@ class PrivateChatRoomFragment : Fragment() {
             privateChatRoomViewModel.chatRoomPreviews.value!!
         )
 
-        privateChatRoomViewModel.chatrooms.observe(viewLifecycleOwner) { it ->
-            chatroomsAdapter.replaceChatRooms(it)
+        privateChatRoomViewModel.chatRoomNames.observe(viewLifecycleOwner) { it ->
+            chatroomsAdapter.replaceChatRoomNames(it)
             chatroomsAdapter.notifyDataSetChanged()
         }
 

@@ -63,13 +63,16 @@ class PrivateChatRoomViewModel : ViewModel() {
                     .addValueEventListener(object: ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
                             val newPreview = ArrayList<String>()
-
-                            for (snap in snapshot.children) {
-                                val message = snap.getValue(Message::class.java)
-                                if (message != null) {
-                                    newPreview.add(chatRoomId)
-                                    newPreview.add(message.message.toString())
+                            newPreview.add(chatRoomId)
+                            if (snapshot.childrenCount > 0) {
+                                for (snap in snapshot.children) {
+                                    val message = snap.getValue(Message::class.java)
+                                    if (message != null) {
+                                        newPreview.add(message.message.toString())
+                                    }
                                 }
+                            } else {
+                                newPreview.add("")
                             }
 
                             addToPreviewsList(newPreview, chatRoomIds)
@@ -141,5 +144,4 @@ class PrivateChatRoomViewModel : ViewModel() {
     fun getChatroom(index: Int) : String {
         return chatrooms.value?.get(index) ?: ""
     }
-
 }
